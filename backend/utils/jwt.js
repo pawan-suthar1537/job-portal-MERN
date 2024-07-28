@@ -6,7 +6,6 @@ export const sendToken = (user, message, res, status) => {
     ),
     httpOnly: true,
   };
-  res.cookie("jwt", token, options);
   return res.status(status).cookie("token", token, options).json({
     success: true,
     status: status,

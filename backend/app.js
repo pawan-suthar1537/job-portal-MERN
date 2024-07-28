@@ -14,6 +14,7 @@ config({
   path: "./config/config.env",
 });
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -34,7 +35,6 @@ app.use(
 app.use("/api/user", userrouter);
 
 connectDB();
-app.use(cookieParser());
 app.use(errorHandler);
 
 export default app;
