@@ -6,6 +6,7 @@ import { connectDB } from "./databse/db.js";
 import { errorHandler } from "./middlewares/error.js";
 import fileUpload from "express-fileupload";
 import userrouter from "./router/userrouter.js";
+import jobrouter from "./router/jobrouter.js";
 import { EventEmitter } from "events";
 EventEmitter.setMaxListeners(20); // Adjust the number as needed
 
@@ -33,6 +34,7 @@ app.use(
 );
 
 app.use("/api/user", userrouter);
+app.use("/api/job", jobrouter);
 
 connectDB();
 app.use(errorHandler);

@@ -13,3 +13,17 @@ export const isauth = trycatchasyncerror(async (req, res, next) => {
 
   next();
 });
+
+export const isauthorized = (...roles) => {
+  return async (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new Error(
+          `${req.user.role} is not allow to access to this resource`,
+          400
+        )
+      );
+    }
+    next();
+  };
+};

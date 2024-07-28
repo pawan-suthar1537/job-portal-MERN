@@ -140,30 +140,30 @@ export const getLoginUserDetails = trycatchasyncerror(
 
 //! update user details
 export const updateuserdetails = trycatchasyncerror(async (req, res, next) => {
-  // console.log(req.user);
   const { name, email, phone, address, first, second, third, coverletter } =
     req.body;
+  const newuserdata = {};
 
-  const newuserdata = {
-    name,
-    email,
-    phone,
-    address,
-    coverletter,
-    niches: {
+  if (name) newuserdata.name = name;
+  if (email) newuserdata.email = email;
+  if (phone) newuserdata.phone = phone;
+  if (address) newuserdata.address = address;
+  if (coverletter) newuserdata.coverletter = coverletter;
+  if (first || second || third) {
+    newuserdata.niches = {
       first,
       second,
       third,
-    },
-  };
+    };
 
-  if (req.user.role === "jobseeker" && (!first || !second || !third)) {
-    return next(
-      new Errorhandle(
-        "Please provide all niches (first, second, and third)",
-        400
-      )
-    );
+    if (req.user.role === "jobseeker" && (!first || !second || !third)) {
+      return next(
+        new Errorhandle(
+          "Please provide all niches (first, second, and third)",
+          400
+        )
+      );
+    }
   }
 
   if (req.files && req.files.resume) {
@@ -189,6 +189,7 @@ export const updateuserdetails = trycatchasyncerror(async (req, res, next) => {
       );
     }
   }
+
   const user = await User.findByIdAndUpdate(req.user.id, newuserdata, {
     new: true,
     runValidators: true,
