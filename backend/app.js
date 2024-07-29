@@ -7,6 +7,7 @@ import { errorHandler } from "./middlewares/error.js";
 import fileUpload from "express-fileupload";
 import userrouter from "./router/userrouter.js";
 import jobrouter from "./router/jobrouter.js";
+import applicationrouter from "./router/applicationrouter.js";
 import { EventEmitter } from "events";
 EventEmitter.setMaxListeners(20); // Adjust the number as needed
 
@@ -35,6 +36,7 @@ app.use(
 
 app.use("/api/user", userrouter);
 app.use("/api/job", jobrouter);
+app.use("/api/application", applicationrouter);
 
 connectDB();
 app.use(errorHandler);
