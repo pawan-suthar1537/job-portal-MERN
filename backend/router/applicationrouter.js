@@ -9,7 +9,16 @@ import {
 
 const router = express.Router();
 
-router.post("/post/:id", isauth, isauthorized("jobseeker"), postapplication);
+router.post(
+  "/post/:id",
+  isauth,
+  isauthorized("jobseeker"),
+  (req, res, next) => {
+    console.log("Route hit: /post/:id");
+    next();
+  },
+  postapplication
+);
 router.get(
   "/employee/getall",
   isauth,

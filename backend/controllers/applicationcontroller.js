@@ -4,46 +4,53 @@ import { Application } from "../models/ApplicationSchema.js";
 import { Job } from "../models/JobSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 
-export const postapplication = trycatchasyncerror(async (req, res) => {
+export const postapplication = trycatchasyncerror(async (req, res, next) => {
   const { id } = req.params;
-  const { name, email, phone, address, resume, coverletter } = req.body;
-
-  if (!id || !name || !email || !phone || !address || !resume || !coverletter) {
-    return new Errorhandle("Please provide all the required fields", 400);
+  if (!id) {
+    return next(new Errorhandle("Job id is required", 400));
   }
-  const isalreadyappied = await Application.findOne({
-    "jobinfo.id": id,
-    "jobseekerinfo.id": req.user._id,
-  });
 
-  if (isalreadyappied) {
-    return new Errorhandle("You have already applied for this job", 400);
+  const { name, email, phone, address, coverletter } = req.body;
+
+  if (!name || !email || !phone || !address || !coverletter) {
+    return next(new Errorhandle("Please provide all the required fields", 400));
   }
+
   const jobseekerinfo = {
-    id: req.user.id,
+    id: req.user._id,
     name,
     email,
     phone,
     address,
-    resume,
     coverletter,
     role: "jobseeker",
   };
 
   const jobdetails = await Job.findById(id);
   if (!jobdetails) {
-    return new Errorhandle("Job not found", 404);
+    return next(new Errorhandle("Job not found", 404));
   }
 
+  const isalreadyappied = await Application.findOne({
+    "jobinfo.id": id,
+    "jobseekerinfo.id": req.user._id,
+  });
+
+  if (isalreadyappied) {
+    return next(new Errorhandle("You have already applied for this job", 400));
+  }
+
+  // Check if files are uploaded
   if (req.files && req.files.resume) {
-    const { resume } = req.files;
+    const resumeFile = req.files.resume;
+
     try {
-      const result = await cloudinary.uploader.upload(resume.tempFilePath, {
+      const result = await cloudinary.uploader.upload(resumeFile.tempFilePath, {
         folder: "JobPortalMERN_resume",
       });
 
       if (!result || result.error) {
-        return new Errorhandle("failed to upload ", 500);
+        return next(new Errorhandle("Failed to upload resume", 500));
       }
 
       jobseekerinfo.resume = {
@@ -51,29 +58,29 @@ export const postapplication = trycatchasyncerror(async (req, res) => {
         url: result.secure_url,
       };
     } catch (error) {
-      return new Errorhandle("failed to upload resume ", 500);
+      return next(new Errorhandle("Failed to upload resume", 500));
     }
   } else {
-    if (req.user && !req.user.resume.url) {
-      return new Errorhandle("Please upload resume", 400);
+    if (!req.user.resume?.url) {
+      return next(new Errorhandle("Please upload resume", 400));
     }
     jobseekerinfo.resume = {
-      public_id: req.user && req.user.resume.public_id,
-      url: eq.user && req.user.resume.url,
+      public_id: req.user.resume.public_id,
+      url: req.user.resume.url,
     };
   }
 
   const employeeinfo = {
-    id: jobdetails.postedby.id,
+    id: jobdetails.postedby,
     role: "employee",
   };
 
   const jobinfo = {
-    id: id,
-    title: jobdetails.title,
+    jobid: jobdetails._id,
+    jobtitle: jobdetails.title,
   };
 
-  const application = Application.create({
+  const application = await Application.create({
     jobseekerinfo,
     employeeinfo,
     jobinfo,
@@ -85,9 +92,23 @@ export const postapplication = trycatchasyncerror(async (req, res) => {
     application,
   });
 });
-export const getallapplicationemploee = trycatchasyncerror(
-  async (req, res) => {}
-);
+export const getallapplicationemploee = trycatchasyncerror(async (req, res) => {
+  const { _id } = req.user;
+  console.log(_id);
+  try {
+    const applications = await Application.find({
+      "employeeinfo.id": _id,
+      // "deletedby.employee": false,
+    }).populate("jobinfo.jobid");
+    return res.status(200).json({
+      status: "success",
+      success: true,
+      applications,
+    });
+  } catch (error) {
+    return next(new Errorhandle(`Error: ${error.message}`, 400));
+  }
+});
 export const getallapplicationjobseeker = trycatchasyncerror(
   async (req, res) => {}
 );
