@@ -98,10 +98,18 @@ export const getallapplicationemploee = trycatchasyncerror(async (req, res) => {
   try {
     const applications = await Application.find({
       "employeeinfo.id": _id,
-      // "deletedby.employee": false,
+      "deletedby.employee": false,
     }).populate("jobinfo.jobid");
+
+    if (!applications || applications.length === 0) {
+      return res.status(404).json({
+        message: "No applications found for the employee",
+        success: false,
+      });
+    }
+
     return res.status(200).json({
-      status: "success",
+      message: "employee all Applications fetched successfully",
       success: true,
       applications,
     });
@@ -110,6 +118,66 @@ export const getallapplicationemploee = trycatchasyncerror(async (req, res) => {
   }
 });
 export const getallapplicationjobseeker = trycatchasyncerror(
-  async (req, res) => {}
+  async (req, res) => {
+    const { _id } = req.user;
+    console.log(_id);
+    try {
+      const applications = await Application.find({
+        "jobseekerinfo.id": _id,
+        "deletedby.jobseeker": false,
+      }).populate("jobinfo.jobid");
+
+      if (!applications || applications.length === 0) {
+        return res.status(404).json({
+          message: "No applications found for the jobseeker",
+          success: false,
+        });
+      }
+
+      return res.status(200).json({
+        message: "jobseeker all Applications fetched successfully",
+        success: true,
+        applications,
+      });
+    } catch (error) {
+      return next(new Errorhandle(`Error: ${error.message}`, 400));
+    }
+  }
 );
-export const deleteapplication = trycatchasyncerror(async (req, res) => {});
+export const deleteapplication = trycatchasyncerror(async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.user;
+  try {
+    const application = await Application.findById(id);
+    if (!application) {
+      return next(new Errorhandle("Application not found", 404));
+    }
+
+    switch (role) {
+      case "employee":
+        application.deletedby.employee = true;
+        await application.save();
+        break;
+      case "jobseeker":
+        application.deletedby.jobseeker = true;
+        await application.save();
+        break;
+      default:
+        return next(new Errorhandle("Invalid role", 400));
+    }
+
+    if (
+      application.deletedby.employee === true &&
+      application.deletedby.jobseeker === true
+    ) {
+      await Application.deleteOne(id);
+    }
+    return res.status(200).json({
+      message: `Application deleted successfully by ${role} ${req.user.name}`,
+      success: true,
+      application,
+    });
+  } catch (error) {
+    return next(new Errorhandle(`Error: ${error.message}`, 400));
+  }
+});

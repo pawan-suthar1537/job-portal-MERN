@@ -28,7 +28,7 @@ router.get(
 router.get(
   "/jobseeker/getall",
   isauth,
-  isauthorized("employee"),
+  isauthorized("jobseeker"),
   getallapplicationjobseeker
 );
 router.delete(
