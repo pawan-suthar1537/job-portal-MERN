@@ -9,6 +9,7 @@ import userrouter from "./router/userrouter.js";
 import jobrouter from "./router/jobrouter.js";
 import applicationrouter from "./router/applicationrouter.js";
 import { EventEmitter } from "events";
+import { newsletter } from "./automation/Newsletter.js";
 EventEmitter.setMaxListeners(20); // Adjust the number as needed
 
 const app = express();
@@ -37,7 +38,7 @@ app.use(
 app.use("/api/user", userrouter);
 app.use("/api/job", jobrouter);
 app.use("/api/application", applicationrouter);
-
+newsletter();
 connectDB();
 app.use(errorHandler);
 
