@@ -5,7 +5,6 @@ import { sendEmail } from "../utils/sendemail.js";
 
 export const newsletter = () => {
   cron.schedule("*/1 * * * *", async () => {
-    console.log("Running cron to send mail");
     try {
       const jobs = await Job.find({ newsletter: true });
       console.log("Jobs fetched:", jobs);
@@ -20,11 +19,6 @@ export const newsletter = () => {
               { "niches.third": job.jobniches },
             ],
           });
-
-          console.log(
-            `Filtered users for job ${job._id}:`,
-            filteredUsers.length
-          );
 
           for (const user of filteredUsers) {
             const email = user.email;
@@ -67,11 +61,9 @@ export const newsletter = () => {
             `;
 
             await sendEmail({ email, subject, message });
-            console.log(`Email sent to ${email} for job ${job._id}`);
           }
-          job.newsletter = false; // Set to false to prevent resending
+          job.newsletter = false;
           await job.save();
-          console.log(`Job ${job._id} marked as newsletter sent.`);
         } catch (userError) {
           console.error(`Error processing job ${job._id}:`, userError.message);
         }

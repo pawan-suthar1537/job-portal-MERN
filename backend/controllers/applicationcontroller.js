@@ -2,6 +2,7 @@ import Errorhandle from "../middlewares/error.js";
 import { trycatchasyncerror } from "../middlewares/trycatchasyncerror.js";
 import { Application } from "../models/ApplicationSchema.js";
 import { Job } from "../models/JobSchema.js";
+import { User } from "../models/UserSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const postapplication = trycatchasyncerror(async (req, res, next) => {
@@ -30,6 +31,14 @@ export const postapplication = trycatchasyncerror(async (req, res, next) => {
   if (!jobdetails) {
     return next(new Errorhandle("Job not found", 404));
   }
+
+  const employee = await User.findById(jobdetails.postedby);
+  if (!employee) {
+    return next(new Errorhandle("Employee not found", 404));
+  }
+
+  console.log(employee);
+  console.log(jobdetails);
 
   const isalreadyappied = await Application.findOne({
     "jobinfo.id": id,
@@ -71,13 +80,31 @@ export const postapplication = trycatchasyncerror(async (req, res, next) => {
   }
 
   const employeeinfo = {
-    id: jobdetails.postedby,
-    role: "employee",
+    id: employee._id,
+    name: employee.name,
+    email: employee.email,
+    phone: employee.phone,
+    address: employee.address,
+    role: employee.role,
   };
 
   const jobinfo = {
     jobid: jobdetails._id,
     jobtitle: jobdetails.title,
+    jobtype: jobdetails.jobtype,
+    location: jobdetails.location,
+    companyname: jobdetails.companyname,
+    introduction: jobdetails.introduction,
+    responsibility: jobdetails.responsibility,
+    qualification: jobdetails.qualification,
+    offers: jobdetails.offers,
+    salary: jobdetails.salary,
+    hiringmultiple: jobdetails.hiringmultiple,
+    website: jobdetails.website,
+    jobniches: jobdetails.jobniches,
+    newsletter: jobdetails.newsletter,
+    jobposted: jobdetails.jobposted,
+    postedby: jobdetails.postedby,
   };
 
   const application = await Application.create({
@@ -92,33 +119,35 @@ export const postapplication = trycatchasyncerror(async (req, res, next) => {
     application,
   });
 });
-export const getallapplicationemploee = trycatchasyncerror(async (req, res) => {
-  const { _id } = req.user;
-  console.log(_id);
-  try {
-    const applications = await Application.find({
-      "employeeinfo.id": _id,
-      "deletedby.employee": false,
-    }).populate("jobinfo.jobid");
+export const getallapplicationemploee = trycatchasyncerror(
+  async (req, res, next) => {
+    const { _id } = req.user;
+    console.log(_id);
+    try {
+      const applications = await Application.find({
+        "employeeinfo.id": _id,
+        "deletedby.employee": false,
+      }).populate("jobinfo.jobid");
 
-    if (!applications || applications.length === 0) {
-      return res.status(404).json({
-        message: "No applications found for the employee",
-        success: false,
+      if (!applications || applications.length === 0) {
+        return res.status(404).json({
+          message: "No applications found for the employee",
+          success: false,
+        });
+      }
+
+      return res.status(200).json({
+        message: "employee all Applications fetched successfully",
+        success: true,
+        applications,
       });
+    } catch (error) {
+      return next(new Errorhandle(`Error: ${error.message}`, 400));
     }
-
-    return res.status(200).json({
-      message: "employee all Applications fetched successfully",
-      success: true,
-      applications,
-    });
-  } catch (error) {
-    return next(new Errorhandle(`Error: ${error.message}`, 400));
   }
-});
+);
 export const getallapplicationjobseeker = trycatchasyncerror(
-  async (req, res) => {
+  async (req, res, next) => {
     const { _id } = req.user;
     console.log(_id);
     try {

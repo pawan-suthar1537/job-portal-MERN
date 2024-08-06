@@ -13,6 +13,6 @@ router.post("/postjob", isauth, isauthorized("employee"), postjob);
 router.get("/getall", getall);
 router.get("/getmyjobs", isauth, isauthorized("employee"), getmyjobs);
 router.delete("/delete/:id", isauth, isauthorized("employee"), deletejob);
-router.get("/getjob/:id", isauth, getjobbyid);
+router.get("/getjob/:id", getjobbyid);
 
 export default router;

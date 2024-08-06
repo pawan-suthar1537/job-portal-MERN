@@ -107,16 +107,20 @@ export const login = trycatchasyncerror(async (req, res, next) => {
 });
 //! logout user
 export const logout = trycatchasyncerror(async (req, res, next) => {
-  res
-    .status(200)
-    .cookie("token", "", {
+  try {
+    res.cookie("token", "", {
       expires: new Date(Date.now()),
       httpOnly: true,
-    })
-    .json({
+    });
+
+    res.status(200).json({
       success: true,
       message: "User logged out successfully",
     });
+  } catch (error) {
+    console.error("Logout error:", error.message); // Debug log
+    return next(new Errorhandle(`Logout error: ${error.message}`, 500));
+  }
 });
 
 //! get login user details
@@ -146,7 +150,7 @@ export const updateuserdetails = trycatchasyncerror(async (req, res, next) => {
 
   if (name) newuserdata.name = name;
   if (email) newuserdata.email = email;
-  if (phone) newuserdata.phone = phone;
+  if (phone) newuserdata.phone = phone.toString();
   if (address) newuserdata.address = address;
   if (coverletter) newuserdata.coverletter = coverletter;
   if (first || second || third) {
