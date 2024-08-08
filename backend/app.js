@@ -35,6 +35,13 @@ app.use(
   })
 );
 
+app.use("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to job portal server",
+  });
+});
+
 app.use("/api/user", userrouter);
 app.use("/api/job", jobrouter);
 app.use("/api/application", applicationrouter);
