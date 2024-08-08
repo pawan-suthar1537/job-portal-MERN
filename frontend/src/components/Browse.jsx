@@ -4,10 +4,19 @@ import Job from "./Job";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchedQuery } from "@/redux/jobSlice";
 import useGetAllJobs from "@/hooks/usegetalljobs";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Browse = () => {
+  const navigate = useNavigate();
+  const isauth = useSelector((store) => store.auth.auth);
+
+  if (!isauth) {
+    toast.error("Please login to see Applications", {});
+    navigate("/login");
+  }
   useGetAllJobs();
-  
+
   const dispatch = useDispatch();
   const { allJobs } = useSelector((store) => store.job);
   console.log("allJobs", allJobs);

@@ -5,12 +5,16 @@ import Job from "./Job";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import useGetAllJobs from "@/hooks/usegetalljobs";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 // const jobsArray = [1, 2, 3, 4, 5, 6, 7, 8];
 
 const Jobs = () => {
   useGetAllJobs();
+  const navigate = useNavigate();
   const { allJobs, searchedQuery } = useSelector((store) => store.job);
+  const isauth = useSelector((store) => store.auth.auth);
   console.log(allJobs);
   const [filterJobs, setFilterJobs] = useState(allJobs);
 
@@ -30,6 +34,11 @@ const Jobs = () => {
       setFilterJobs(allJobs);
     }
   }, [allJobs, searchedQuery]);
+
+  if (!isauth) {
+    toast.error("Please login to see jobs", {});
+    navigate("/login");
+  }
 
   return (
     <div>

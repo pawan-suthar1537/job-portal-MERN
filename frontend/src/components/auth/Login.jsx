@@ -11,6 +11,13 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser, setAuth, setToken } from "@/redux/authSlice";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const Login = () => {
   const [input, setInput] = useState({
@@ -94,31 +101,19 @@ const Login = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <RadioGroup className="flex items-center gap-4 my-5">
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="radio"
-                  name="role"
-                  value="jobseeker"
-                  checked={input.role === "jobseeker"}
-                  onChange={changeEventHandler}
-                  className="cursor-pointer"
-                />
-                <Label htmlFor="r1">Job Seeker</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="radio"
-                  name="role"
-                  value="employee"
-                  checked={input.role === "employee"}
-                  onChange={changeEventHandler}
-                  className="cursor-pointer"
-                />
-                <Label htmlFor="r2">Employee</Label>
-              </div>
-            </RadioGroup>
+          <div className="my-2">
+            <Label>Role</Label>
+            <Select
+              onValueChange={(value) => setInput({ ...input, role: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="jobseeker">Job Seeker</SelectItem>
+                <SelectItem value="employee">Employee</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {loading ? (

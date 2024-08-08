@@ -81,6 +81,7 @@ export const postjob = trycatchasyncerror(async (req, res, next) => {
 
 export const getall = trycatchasyncerror(async (req, res, next) => {
   try {
+    console.log("Get All Jobs");
     const { location, jobniches, serchkeyword } = req.query;
     const queryobj = {};
     if (location) {
@@ -152,7 +153,6 @@ export const getmyjobs = trycatchasyncerror(async (req, res, next) => {
 });
 export const deletejob = trycatchasyncerror(async (req, res, next) => {
   try {
-    console.log("delete chla");
     const { id } = req.params;
     console.log("Delete Job Request Received for ID:", id);
     const job = await Job.findById(id);
