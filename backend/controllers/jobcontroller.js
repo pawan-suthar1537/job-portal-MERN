@@ -2,6 +2,8 @@ import Errorhandle from "../middlewares/error.js";
 import { trycatchasyncerror } from "../middlewares/trycatchasyncerror.js";
 import { Job } from "../models/JobSchema.js";
 
+const CACHE_EXPIRATION_TIME = 3600 * 1000;
+
 export const postjob = trycatchasyncerror(async (req, res, next) => {
   try {
     const {
@@ -94,10 +96,33 @@ export const getall = trycatchasyncerror(async (req, res, next) => {
         { location: { $regex: serchkeyword, $options: "i" } },
       ];
     }
+
+    const cacheKey = JSON.stringify(queryobj);
+
+    if (
+      cache[cacheKey] &&
+      Date.now() - cache[cacheKey].timestamp < CACHE_EXPIRATION_TIME
+    ) {
+      const cachedData = cache[cacheKey].data;
+      return res.status(200).json({
+        status: "success",
+        message: "Jobs fetched successfully (from cache)",
+        jobs: cachedData,
+        count: cachedData.length,
+      });
+    }
+
     const jobs = await Job.find(queryobj);
+
     if (!jobs || jobs.length === 0) {
       return next(new Errorhandle(`No jobs found`, 404));
     }
+
+    cache[cacheKey] = {
+      data: jobs,
+      timestamp: Date.now(),
+    };
+
     return res.status(200).json({
       status: "success",
       message: "Jobs fetched successfully",
@@ -125,10 +150,11 @@ export const getmyjobs = trycatchasyncerror(async (req, res, next) => {
     return next(new Errorhandle(`Login error: ${error.message}`, 400));
   }
 });
-
 export const deletejob = trycatchasyncerror(async (req, res, next) => {
   try {
+    console.log("delete chla");
     const { id } = req.params;
+    console.log("Delete Job Request Received for ID:", id);
     const job = await Job.findById(id);
     if (!job) {
       return next(new Errorhandle(`No job found`, 404));
@@ -139,12 +165,14 @@ export const deletejob = trycatchasyncerror(async (req, res, next) => {
       );
     }
     await Job.deleteOne({ _id: id });
+    console.log("Job Deleted Successfully:", id);
     return res.status(200).json({
-      status: "success",
+      status: true,
       message: "Job deleted successfully",
       job,
     });
   } catch (error) {
+    console.error("Delete Job Error", error);
     return next(new Errorhandle(`Login error: ${error.message}`, 400));
   }
 });

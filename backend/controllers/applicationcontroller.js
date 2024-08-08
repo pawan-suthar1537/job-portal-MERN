@@ -123,29 +123,31 @@ export const getallapplicationemploee = trycatchasyncerror(
   async (req, res, next) => {
     const { _id } = req.user;
     console.log(_id);
-    try {
-      const applications = await Application.find({
-        "employeeinfo.id": _id,
-        "deletedby.employee": false,
-      }).populate("jobinfo.jobid");
 
-      if (!applications || applications.length === 0) {
+    try {
+      // Find all job IDs posted by the employee
+      const jobs = await Job.find({
+        postedby: _id,
+      });
+
+      if (!jobs || jobs.length === 0) {
         return res.status(404).json({
-          message: "No applications found for the employee",
+          message: "No jobs found for the employee",
           success: false,
         });
       }
 
       return res.status(200).json({
-        message: "employee all Applications fetched successfully",
+        message: "Employee's all jobs posts fetched successfully",
         success: true,
-        applications,
+        jobs,
       });
     } catch (error) {
       return next(new Errorhandle(`Error: ${error.message}`, 400));
     }
   }
 );
+
 export const getallapplicationjobseeker = trycatchasyncerror(
   async (req, res, next) => {
     const { _id } = req.user;

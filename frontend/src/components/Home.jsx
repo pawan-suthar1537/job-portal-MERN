@@ -11,13 +11,13 @@ import useGetAllJobs from "@/hooks/usegetalljobs";
 
 const Home = () => {
   useGetAllJobs();
-  // const  user  = useSelector((store) => store.auth.user);
-  // const navigate = useNavigate();
-  // useEffect(() => {
-  //   if (user?.role === "recruiter") {
-  //     navigate("/admin/companies");
-  //   }
-  // }, []);
+  const user = useSelector((store) => store.auth.user);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user?.role === "employee") {
+      navigate("/employee/alljobs");
+    }
+  }, []);
 
   return (
     <div>

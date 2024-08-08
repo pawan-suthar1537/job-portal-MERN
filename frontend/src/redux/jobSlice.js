@@ -33,6 +33,11 @@ const jobSlice = createSlice({
     setFilters: (state, action) => {
       state.filters = action.payload;
     },
+    deleteJob: (state, action) => {
+      state.allAdminJobs = state.allAdminJobs.filter(
+        (job) => job._id !== action.payload
+      );
+    },
   },
 });
 export const {
@@ -43,5 +48,6 @@ export const {
   setAllAppliedJobs,
   setSearchedQuery,
   setFilters,
+  deleteJob,
 } = jobSlice.actions;
 export default jobSlice.reducer;
