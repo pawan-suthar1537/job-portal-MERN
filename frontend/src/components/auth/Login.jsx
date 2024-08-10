@@ -48,6 +48,7 @@ const Login = () => {
           withCredentials: true,
         }
       );
+      console.log("login res", res.data);
       if (res.data.success == true) {
         dispatch(setUser(res.data.user));
         dispatch(setAuth(true));

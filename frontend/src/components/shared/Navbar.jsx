@@ -75,9 +75,7 @@ const Navbar = () => {
 
                   <div>
                     <h4 className="font-medium">hello</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Lorem ipsum dolor sit,
-                    </p>
+                    <p className="text-sm text-muted-foreground"></p>
                   </div>
                 </div>
                 <div className="flex flex-col items-start text-gray-600">
